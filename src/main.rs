@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::WindowResolution};
 
 #[derive(Component)]
 struct Player;
@@ -18,16 +18,32 @@ struct Position { x: f32, y: f32 }
 #[derive(Component)]
 struct Velocity { value: f32 }
 
+#[derive(Component)]
+struct Bullet;
+
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins
+            .set(WindowPlugin{
+                primary_window : Some(Window{
+                    title : String::from("StarsGame"),
+                    position : WindowPosition::Centered(MonitorSelection::Current),
+                    resolution : WindowResolution::new(480.0, 640.0),
+                    ..Default::default()
+                }),..Default::default()
+            })
+            .set(ImagePlugin::default_nearest())
+        )
         .add_systems(Startup, setup)
         .add_systems(Update, (movement_system, attack_system))
         .run();
 }
 
 fn setup(mut cmd: Commands) {
-    // инициализация игрока
+    // TODO: make actual game camera and render
+    cmd.spawn(Camera2d::default());
+
+    // player inizialization
     cmd.spawn((
         Player,
         Health { value: 100.0 },
@@ -37,7 +53,7 @@ fn setup(mut cmd: Commands) {
         Name::new("Player"),
     ));
 
-    // инициализация врага
+    // enemy inizialzation
     cmd.spawn((
         Enemy,
         Health { value: 30.0 },
@@ -71,6 +87,7 @@ fn movement_system(
     }
 }
 
+// TODO: rewrite to make it match gameplay
 fn attack_system(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut player_query: Query<(&AttackPower, &Position), With<Player>>,
