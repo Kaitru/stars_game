@@ -39,7 +39,10 @@ fn main() {
         .run();
 }
 
-fn setup(mut cmd: Commands) {
+fn setup(
+    mut cmd: Commands,
+    asset_server: Res<AssetServer>,
+    ) {
     // TODO: make actual game camera and render
     cmd.spawn(Camera2d::default());
 
@@ -49,7 +52,9 @@ fn setup(mut cmd: Commands) {
         Health { value: 100.0 },
         AttackPower { value: 15.0 },
         Velocity { value: 50.0 },
-        Position { x: 0.0, y: 0.0 },
+        Sprite::from_image(
+            asset_server.load("player.png")
+        ),
         Name::new("Player"),
     ));
 
@@ -59,7 +64,6 @@ fn setup(mut cmd: Commands) {
         Health { value: 30.0 },
         AttackPower { value: 15.0 },
         Velocity { value: 20.0 },
-        Position { x: 0.0, y: 500.0 },
         Name::new("Jet"),
     ));
 }
@@ -67,22 +71,27 @@ fn setup(mut cmd: Commands) {
 fn movement_system(
     time: Res<Time>,
     keyboard: Res<ButtonInput<KeyCode>>,
-    mut player_query: Query<(&Velocity, &mut Position), With<Player>>,
+    mut player_query: Query<(&Velocity, &mut Transform), With<Player>>,
 ) {
-    if let Ok((speed, mut position)) = player_query.single_mut() {
+    if let Ok((speed, mut transform)) = player_query.single_mut() {
         let delta = time.delta_secs();
+        let mut direction = Vec3::ZERO;
 
         if keyboard.pressed(KeyCode::KeyA) {
-            position.x -= speed.value * delta;
+            direction.x -= 1.0;
         }
         if keyboard.pressed(KeyCode::KeyS) {
-            position.y -= speed.value * delta;
+            direction.y -= 1.0;
         }
         if keyboard.pressed(KeyCode::KeyW) {
-            position.y += speed.value * delta;
+            direction.y += 1.0;
         }
         if keyboard.pressed(KeyCode::KeyD) {
-            position.x += speed.value * delta;
+            direction.x += 1.0;
+        }
+
+        if direction.length() > 0.0 {
+            transform.translation += direction.normalize() * speed.value * delta
         }
     }
 }
