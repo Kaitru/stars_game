@@ -1,5 +1,8 @@
 // TODO: make modules and refactor them so the code isn't that shitty one file
+//       make enemy dying when got shot
+//       make different types of enemies
 use bevy::{prelude::*, window::WindowResolution};
+use rand::Rng;
 
 #[derive(Component)]
 struct Player;
@@ -33,7 +36,14 @@ fn main() {
             .set(ImagePlugin::default_nearest())
         )
         .add_systems(Startup, setup)
-        .add_systems(Update, (movement_system, attack_system, bullet_movement_system, bullet_despawn_system))
+        .add_systems(Update, (
+            movement_system,
+            attack_system,
+            bullet_movement_system,
+            bullet_despawn_system,
+            enemy_spawn_system,
+            enemy_movement_system
+        ))
         .run();
 }
 
@@ -89,12 +99,13 @@ fn attack_system(
 ) {
     if keyboard.just_pressed(KeyCode::Space) {
         if let Ok(player_transform) = player_query.single() {
-            let bullet_position = player_transform.translation + Vec3::new(0.0, 30.0, 0.0);
+            let bullet_position = player_transform.translation + Vec3::new(0.0, 25.0, 0.0);
         
             cmd.spawn((
                 Bullet,
-                Sprite::from_color(Color::linear_rgb(130.0, 193.0, 54.0), Vec2 { x: 6.0, y: 10.0 }),
+                Sprite::from_color(Color::linear_rgb(0.5, 0.75, 0.21), Vec2 { x: 6.0, y: 10.0 }),
                 AttackPower { value: 15.0 },
+                Velocity { value: 100.0 },
                 Transform::from_translation(bullet_position),
                 Name::new("Bullet"),
             ));
@@ -102,31 +113,60 @@ fn attack_system(
     }
 }
 
-// TODO: fix all bullets stop when another bullet spawns
 fn bullet_movement_system(
     time: Res<Time>,
-    mut bullet_query: Query<&mut Transform, With<Bullet>>
+    mut bullet_query: Query<(&Velocity, &mut Transform), With<Bullet>>
 ) {
-    if let Ok(mut transform) = bullet_query.single_mut() {
-        let mut direction = Vec3::ZERO;
+    for (velocity, mut transform) in &mut bullet_query {
+            transform.translation.y += velocity.value * time.delta_secs();
+        }
+    }
 
-        direction.y += 100.0;
-        if direction.length() > 0.0 {
-            transform.translation += direction.normalize() * 100.0 * time.delta_secs();
+fn bullet_despawn_system(
+    mut cmd: Commands,
+    bullet_query: Query<(Entity, &Transform), With<Bullet>>,
+) {
+    let max_height = 320.0;
+    
+    for (entity, transform) in &bullet_query {
+        if transform.translation.y > max_height {
+            cmd.entity(entity.entity()).despawn();
         }
     }
 }
 
-// TODO: fix bullet despawn
-fn bullet_despawn_system(
+// TODO: make a sprite for the enemy
+//       make different types of the enemies
+fn enemy_spawn_system(
     mut cmd: Commands,
-    bullet_query: Query<(Entity, &Transform), With<Bullet>>
+    asset_server: Res<AssetServer>
 ) {
-    let max_height = 320.0;
+    let mut rng = rand::rng();
 
-    for (entity, transform) in bullet_query.iter() {
-        if transform.translation.y >= max_height {
-            cmd.entity(entity).despawn();
-        }
+    let spawn = rng.random_range(0..1000);
+    println!("{}", spawn);
+
+    if spawn > 980 {
+        let enemy_spawn_position = Vec3::new(rng.random_range(-300.0..300.0), 340.0, 0.0);
+
+        cmd.spawn((
+            Enemy,
+            Health { value: 30.0 },
+            Velocity { value: 50.0 },
+            Sprite::from_color(
+                Color::LinearRgba(
+                    LinearRgba { red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0 }), 
+                    Vec2 { x: 15.0, y: 15.0 }),
+            Transform::from_translation(enemy_spawn_position),
+            Name::new("Jet")
+        ));
     }
+}
+
+fn enemy_movement_system(
+    time: Res<Time>,
+    mut enemy_query: Query<(&Velocity, &mut Transform), With<Enemy>>) {
+        for (velocity, mut transform) in &mut enemy_query {
+            transform.translation.y -= velocity.value * time.delta_secs();
+        }
 }
