@@ -10,8 +10,9 @@ pub fn player_setup(
         Player,
         Health { value: 100.0 },
         AttackPower { value: 15.0 },
-        Velocity { value: 50.0 },
+        Velocity { value: 150.0 },
         Sprite::from_image(asset_server.load("player.png")),
+        // Transform::from_translation(translation)
         Name::new("Player"),
     ));
 }

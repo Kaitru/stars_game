@@ -15,8 +15,8 @@ pub fn enemy_spawn_system(
     let spawn = rng.random_range(0..1000);
     // println!("{}", spawn);
 
-    if spawn > 990 {
-        let enemy_spawn_position = Vec3::new(rng.random_range(-240.0..240.0), 340.0, 0.0);
+    if spawn > 995 {
+        let enemy_spawn_position = Vec3::new(rng.random_range(-240.0..240.0), 340.0, 1.0);
 
         cmd.spawn((
             Enemy,
@@ -24,7 +24,7 @@ pub fn enemy_spawn_system(
             Velocity { value: 50.0 },
             Sprite::from_color(
                 Color::LinearRgba(
-                    LinearRgba { red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0 }), 
+                    LinearRgba { red: 1.0, green: 0.3, blue: 0.3, alpha: 1.0 }), 
                     Vec2 { x: 15.0, y: 15.0 }),
             Transform::from_translation(enemy_spawn_position),
             Name::new("Jet")

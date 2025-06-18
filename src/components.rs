@@ -17,3 +17,6 @@ pub struct Velocity { pub value: f32 }
 
 #[derive(Component)]
 pub struct Bullet;
+
+#[derive(Component)]
+pub struct Star;

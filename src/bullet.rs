@@ -1,9 +1,6 @@
 use bevy::prelude::*;
 use crate::components::{Bullet, AttackPower, Velocity, Player};
 
-const SCREEN_HEIGHT: f32 = 320.0;
-const BULLET_SPEED: f32 = 300.0;
-
 pub fn attack_system(
     mut cmd: Commands,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -17,7 +14,7 @@ pub fn attack_system(
                 Bullet,
                 Sprite::from_color(Color::linear_rgb(0.5, 0.75, 0.21), Vec2 { x: 6.0, y: 10.0 }),
                 AttackPower { value: 15.0 },
-                Velocity { value: BULLET_SPEED },
+                Velocity { value: 500.0 },
                 Transform::from_translation(bullet_position),
                 Name::new("Bullet"),
             ));
@@ -39,7 +36,7 @@ pub fn bullet_despawn_system(
     bullet_query: Query<(Entity, &Transform), With<Bullet>>,
 ) {
     for (entity, transform) in &bullet_query {
-        if transform.translation.y > SCREEN_HEIGHT {
+        if transform.translation.y > 320.0 {
             cmd.entity(entity).despawn();
         }
     }
