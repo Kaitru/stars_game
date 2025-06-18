@@ -19,11 +19,11 @@ I only tested it on `Arch Linux` with `Vulkan` but it should probably work on ot
 - Player movement
 - Shooting
 - Enemy spawning
+- Enemy killing and despawning mechanics
 
 ## Planned features:
-- Enemy killing mechanics
 - Different enemy types
-- Loacal score system
+- Local score system
 - Background
 - Normal sprites?
 - Main menu

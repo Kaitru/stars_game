@@ -1,16 +1,15 @@
-// TODO: make modules and refactor them so the code isn't that shitty one file
-//       make enemy dying when got shot
-//       make different types of enemies
 use bevy::{prelude::*, window::WindowResolution};
 
 mod components;
 mod player;
 mod enemy;
 mod bullet;
+mod combat;
 
 use enemy::*;
 use player::*;
 use bullet::*;
+use combat::*;
 
 fn main() {
     App::new()
@@ -25,15 +24,16 @@ fn main() {
             })
             .set(ImagePlugin::default_nearest())
         )
-        .add_systems(Startup, setup_camera)
+        .add_systems(Startup, (setup_camera, player_setup))
         .add_systems(Update, (
-            player_setup,
             movement_system,
             attack_system,
             bullet_movement_system,
             bullet_despawn_system,
             enemy_spawn_system,
-            enemy_movement_system
+            bullet_hit_system, // Добавьте эту систему
+            enemy_movement_system,
+            enemy_despawn_system
         ))
         .run();
 }
